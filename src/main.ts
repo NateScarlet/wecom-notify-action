@@ -45,12 +45,21 @@ ${buildLink}
         }
       })
     })
-    core.info(
-      JSON.stringify({
-        status: resp.status,
-        body: await resp.text()
-      })
-    )
+    if (resp.status === 200) {
+      const body = (await resp.json()) as { errcode: number; errmsg: string }
+      if (body.errcode) {
+        core.setFailed(JSON.stringify(body))
+      } else {
+        core.info(JSON.stringify(body))
+      }
+    } else {
+      core.setFailed(
+        JSON.stringify({
+          status: resp.status,
+          body: await resp.text()
+        })
+      )
+    }
   } catch (err) {
     core.setFailed(err instanceof Error ? err : String(err))
   }
