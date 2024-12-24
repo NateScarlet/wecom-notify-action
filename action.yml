@@ -1,24 +1,28 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'wecom notify action'
+description: 'send build result to wecom group through webhook'
+author: 'NateScarlet'
 
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'send'
+  color: 'blue'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  result:
+    description: 'build result (e.g. `{{ $needs.build.result }}`)'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
-
+  webhook-url:
+    description: 'wecom webhook url`'
+    required: true
+  commit-message:
+    description: 'commit message'
+    required: false
+    default: '${{ github.event.head_commit.message }}'
+  mention:
+    description: 'mention user per line'
+    required: false
+    default: '${{ github.event.head_commit.author.username }}'
 runs:
   using: node20
   main: dist/index.js

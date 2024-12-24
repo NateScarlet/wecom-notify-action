@@ -1,26 +1,57 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
 
-/**
- * The main function for the action.
- * @returns {Promise<void>} Resolves when the action is complete.
- */
-export async function run(): Promise<void> {
+export async function run() {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const buildStatus = core.getInput('result')
+    const webhookURL = core.getInput('webhook-url', { required: true })
+    const mention = core.getMultilineInput('mention')
+    const commitBranch = process.env['GITHUB_REF']?.split('/').pop() || ''
+    const buildNumber = process.env['GITHUB_RUN_NUMBER'] || '-1'
+    const commitSha = process.env['GITHUB_SHA'] || ''
+    const commitMessage = core.getInput('commit-message')
+    const actor = process.env['GITHUB_ACTOR'] || ''
+    const buildLink =
+      process.env['GITHUB_SERVER_URL'] +
+      '/' +
+      process.env['GITHUB_REPOSITORY'] +
+      '/actions/runs/' +
+      process.env['GITHUB_RUN_ID']
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    let statusMessage = ''
+    if (buildStatus === 'success') {
+      statusMessage = '🟢OK'
+    } else if (buildStatus === 'failure') {
+      statusMessage = '🔴FAIL'
+    } else {
+      statusMessage = buildStatus
+    }
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const content = `\
+# 🚀${statusMessage} ${commitBranch}#${buildNumber} ${commitSha.substring(0, 6)}
+${commitMessage}
+  by ${actor}
+${buildLink}
+`
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+    // https://developer.work.weixin.qq.com/document/path/91770
+    // spell-checker: word msgtype
+    const resp = await fetch(webhookURL, {
+      method: 'POST',
+      body: JSON.stringify({
+        msgtype: 'text',
+        text: {
+          content,
+          mentioned_list: mention
+        }
+      })
+    })
+    core.info(
+      JSON.stringify({
+        status: resp.status,
+        body: await resp.text()
+      })
+    )
+  } catch (err) {
+    core.setFailed(err instanceof Error ? err : String(err))
   }
 }
