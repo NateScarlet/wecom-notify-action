@@ -25681,7 +25681,7 @@ async function run() {
         const buildStatus = core.getInput('result');
         const webhookURL = core.getInput('webhook-url', { required: true });
         const mention = core.getMultilineInput('mention');
-        const commitBranch = process.env['GITHUB_REF']?.split('/').pop() || '';
+        const commitBranch = process.env['GITHUB_REF'] || '';
         const buildNumber = process.env['GITHUB_RUN_NUMBER'] || '-1';
         const commitSha = process.env['GITHUB_SHA'] || '';
         const commitMessage = core.getInput('commit-message');
@@ -25702,7 +25702,7 @@ async function run() {
             statusMessage = buildStatus;
         }
         const content = `\
-# 🚀${statusMessage} ${commitBranch}#${buildNumber} ${commitSha.substring(0, 6)}
+${statusMessage} ${commitBranch}#${buildNumber} ${commitSha.substring(0, 6)}
 ${commitMessage}
   by ${actor}
 ${buildLink}
