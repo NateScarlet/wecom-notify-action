@@ -25690,7 +25690,7 @@ async function run() {
             '/' +
             process.env['GITHUB_REPOSITORY'] +
             '/actions/runs/' +
-            process.env['GITHUB_RUN_ID'];
+            process.env['GITHUB_RUN_NUMBER'];
         let statusMessage = '';
         if (buildStatus === 'success') {
             statusMessage = '🟢OK';
