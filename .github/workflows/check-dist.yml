@@ -30,11 +30,8 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          version: 9
-          run_install: false
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Setup Node.js
         id: setup-node
