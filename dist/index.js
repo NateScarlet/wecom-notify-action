@@ -25694,6 +25694,7 @@ async function run() {
         const commitSha = process.env['GITHUB_SHA'] || '';
         const commitMessage = core.getInput('commit-message');
         const actor = process.env['GITHUB_ACTOR'] || '';
+        const repoFull = process.env['GITHUB_REPOSITORY'] || '';
         const buildLink = process.env['GITHUB_SERVER_URL'] +
             '/' +
             process.env['GITHUB_REPOSITORY'] +
@@ -25710,9 +25711,9 @@ async function run() {
             statusMessage = buildStatus;
         }
         const content = `\
-${statusMessage} ${refName}#${buildNumber} ${commitSha.substring(0, 6)}
+${statusMessage} ${repoFull}#${buildNumber}
 ${commitMessage}
-  by ${actor}
+  by ${actor} on ${refName} ${commitSha.substring(0, 6)}
 ${buildLink}
 `;
         // https://developer.work.weixin.qq.com/document/path/91770
